@@ -2,6 +2,7 @@
 #include <string.h>
 #include "total.h"
 
+// Function to get the next book ID
 int next_id()
 {
         FILE *fp = fopen("books.txt", "r");
@@ -22,6 +23,7 @@ int next_id()
         return count;
 }
 
+// Function to add a new book
 void addBook()
 {
         FILE *fp;
@@ -47,6 +49,7 @@ void addBook()
         printf("Book added successfully! Book ID is %d \n", id);
 }
 
+// Function to delete a book by ID
 void editBook()
 {
         FILE *fp = fopen("books.txt", "r");
@@ -125,9 +128,57 @@ void editBook()
                 printf("Book ID not found.\n");
 }
 
-// void deleteBook() {
+// Function to delete a book
+void deleteBook()
+{
+        FILE *fp = fopen("books.txt", "r");
+        FILE *temp = fopen("temp.txt", "w");
 
-// }
+        if (fp == NULL)
+        {
+                printf("No books available.\n");
+                return;
+        }
+
+        int bookId, found = 0;
+        char line[200];
+
+        showBookList();
+        printf("\nEnter the Book ID to delete: ");
+        scanf("%d", &bookId);
+
+        while (fgets(line, sizeof(line), fp))
+        {
+                int id, quantity;
+                char name[50], author[50];
+                float price;
+
+                sscanf(line, "%d,%49[^,],%49[^,],%f,%d",
+                       &id, name, author, &price, &quantity);
+
+                if (id == bookId)
+                {
+                        found = 1;
+                        continue;
+                }
+
+                fprintf(temp, "%d,%s,%s,%.2f,%d\n",
+                        id, name, author, price, quantity);
+        }
+
+        fclose(fp);
+        fclose(temp);
+
+        remove("books.txt");
+        rename("temp.txt", "books.txt");
+
+        if (found)
+                printf("Book deleted successfully.\n");
+        else
+                printf("Book ID not found.\n");
+}
+
+// Function to display the list of books
 void showBookList()
 {
         FILE *fp = fopen("books.txt", "r");
