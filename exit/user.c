@@ -1,9 +1,9 @@
 #include<stdio.h>
-#include "user.h"
+#include "total.h"
 #include "usershowbook.h"
 #include "book_common.h"
 
-/* function prototype (optional but good practice) */
+
 void showBookDetails(int id);
 
 void userPage() {
