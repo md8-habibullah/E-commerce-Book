@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "total.h"
-
+    
 int login_user()
 {
     FILE *fp;
@@ -53,7 +53,7 @@ int login_user()
     return 0;
 }
 
-int main()
-{
-    login_user();
-}
+// int main()
+// {
+//     login_user();
+// }

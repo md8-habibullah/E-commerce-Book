@@ -2,8 +2,9 @@
 #include <string.h>
 #include "total.h"
 
-// Function to get the next book ID
-int next_id()
+
+// int next_id()
+ int nextBook_id()
 {
         FILE *fp = fopen("books.txt", "r");
         if (fp == NULL)
@@ -23,11 +24,10 @@ int next_id()
         return count;
 }
 
-// Function to add a new book
 void addBook()
 {
         FILE *fp;
-        int id = next_id();
+        int id = nextBook_id();
         char name[50];
         char author[50];
         float price;

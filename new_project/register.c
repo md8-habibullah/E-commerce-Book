@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
-// #include "total.h"
+#include "total.h"
 
-int next_id();
-void register_user();
+// int next_id();
+// void register_user();
 
 int next_id()
 {
@@ -25,10 +25,10 @@ int next_id()
     return count;
 }
 
-int main () {
-    register_user();
+// int main () {
+//     register_user();
    
-}
+// }
 
 void register_user(){
     FILE *fp;
