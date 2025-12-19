@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include "admin.h"
-#include "user.h"
+#include "total.h"
 
-// Function declarations
 void adminPage();
 void userPage();
 void showBookList();
