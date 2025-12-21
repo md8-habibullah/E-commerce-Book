@@ -2,50 +2,76 @@
 #include "total.h"
 #include <string.h>
 
-
 // void showBookDetails(int id);
-void userPage() {
+void userPage()
+{
     int choice;
     int bookId;
     char res[10];
 
-    do {
-        printf("\n===== USER PAGE =====\n");
-        printf("1. Book List\n");
-        printf("2. Order List\n");
-        printf("3. View Cart\n");
-        printf("0. Logout\n");
-        printf("Enter your choice: ");
-        scanf("%d", &choice);
+    do
+    {
+        // --- DASHBOARD UI START ---
+        printf("\n\t\t========================================");
+        printf("\n\t\t           USER CONTROL PANEL           ");
+        printf("\n\t\t========================================");
+        printf("\n\t\t  [1] Browse Book List");
+        printf("\n\t\t  [2] View My Orders");
+        printf("\n\t\t  [3] Access Shopping Cart");
+        printf("\n\t\t  [0] Logout Session");
+        printf("\n\t\t----------------------------------------");
+        printf("\n\t\tEnter choice: ");
+        // --- DASHBOARD UI END ---
 
-        switch (choice) {
-            case 1:
-                showBookList();
-                
-                printf("Do you want to view Details? Enter Yes or No");
-                scanf("%s",res);
-                if(strcmp(res,"Yes")==0){
-                 printf("\nSelect a book ID to view details: \n");
-                 scanf("%d", &bookId);
+        if (scanf("%d", &choice) != 1)
+        {
+            printf("\n\t\t[!] Please enter a valid number.");
+            while (getchar() != '\n')
+                ;
+            continue;
+        }
+
+        switch (choice)
+        {
+        case 1:
+            printf("\n\t\t--- LOADING BOOK GALLERY ---\n");
+            showBookList();
+
+            printf("\n\t\tDo you want to view Details? (Yes/No): ");
+            scanf("%s", res);
+
+            // Flexible check for "Yes" or "yes"
+            if (strcmp(res, "Yes") == 0 || strcmp(res, "yes") == 0)
+            {
+                printf("\t\tEnter Book ID to inspect: ");
+                scanf("%d", &bookId);
                 showBookDetails(bookId);
-                }
-               
-                break;
+            }
+            break;
 
-            case 2:
-                printf("\n[Order List Selected]\n");
-                break;
+        case 2:
+            printf("\n\t\t>> Opening Order History...\n");
+            // order_list_function();
+            break;
 
-            case 3:
-                printf("\n[View Cart Selected]\n");
-                break;
+        case 3:
+            printf("\n\t\t>> Opening Your Cart...\n");
+            // cart_function();
+            break;
 
-            case 0:
-                printf("\nUser Logged Out.\n");
-                break;
+        case 0:
+            printf("\n\t\t[!] Logging out... Session ended safely.\n");
+            break;
 
-            default:
-                printf("\nInvalid Choice!\n");
+        default:
+            printf("\n\t\t[!] Selection not recognized!\n");
+        }
+
+        if (choice != 0)
+        {
+            printf("\n\t\tPress Enter to return to Dashboard...");
+            getchar();
+            getchar(); // Wait for user input
         }
 
     } while (choice != 0);
@@ -80,17 +106,3 @@ void userPage() {
 
 //     fclose(fp);
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

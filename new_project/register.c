@@ -2,9 +2,6 @@
 #include <string.h>
 #include "total.h"
 
-// int next_id();
-// void register_user();
-
 int next_id()
 {
     FILE *fp = fopen("users_database.txt", "r");
@@ -22,13 +19,9 @@ int next_id()
         }
     }
     fclose(fp);
-    return count;
+    // Adding 1 because if there are 0 lines, the first user is ID 1
+    return count + 1; 
 }
-
-// int main () {
-//     register_user();
-
-// }
 
 void register_user()
 {
@@ -36,17 +29,31 @@ void register_user()
     int id = next_id();
     char username[50], password[50], email[100];
 
-    printf("===== USER REGISTRATION =====\n");
-    printf("Enter username: ");
+    // --- BEAUTIFIED DESIGN START ---
+    printf("\n\t\t----------------------------\n");
+    printf("\t\t USER REGISTRATION PORTAL \n");
+    printf("\t\t----------------------------\n");
+    
+    printf("\t\t%-15s: ", "Username");
     scanf("%s", username);
-    printf("Enter email: ");
+    
+    printf("\t\t%-15s: ", "Email Address");
     scanf("%s", email);
 
-    printf("Enter password: ");
+    printf("\t\t%-15s: ", "Password");
     scanf("%s", password);
+    // --- BEAUTIFIED DESIGN END ---
 
     fp = fopen("users_database.txt", "a");
-    fprintf(fp, "%d,%s,%s,%s\n", id, username, email, password);
-    fclose(fp);
-    printf("Registration successful! Your user ID is %d \n", id);
+    if (fp != NULL) {
+        fprintf(fp, "%d,%s,%s,%s\n", id, username, email, password);
+        fclose(fp);
+        
+        printf("\t\t----------------------------\n");
+        printf("\t\t[SUCCESS] Registered!\n");
+        printf("\t\tYour User ID is: %d\n", id);
+        printf("\t\t----------------------------\n");
+    } else {
+        printf("\t\t[ERROR] Could not open database!\n");
+    }
 }
