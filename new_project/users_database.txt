@@ -1,4 +1,3 @@
-1,alice,alice@mail.com,password123
 1,test,test@email,111
 2,aaa,aaa@mail,1234
 3,bbb,123,111

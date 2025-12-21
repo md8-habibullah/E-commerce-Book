@@ -2,17 +2,17 @@
 #define TOTAL_H
 
 void adminPage();
-void userPage();
+void userPage(char *loggedInUser); // Updated
 void addBook();
 void editBook();
 void deleteBook();
 void showBookList();
 void register_user();
 int login_user();
-// int next_id();
-void showBookDetails();
+void showBookDetails(int targetId, char *username); // Updated to accept username
 int login_admin();
 
-void placeOrder(int bookId, char *bookName, float price);
+// Updated to match order.c definition
+void placeOrder(char *username, int bookId, char *bookName, float price);
 
 #endif

@@ -180,7 +180,9 @@ void showBookList()
         fclose(fp);
 }
 
-void showBookDetails(int targetId)
+// ... other functions ...
+
+void showBookDetails(int targetId, char *username) // Accept username here
 {
         FILE *fp = fopen("books.txt", "r");
         if (fp == NULL)
@@ -211,7 +213,6 @@ void showBookDetails(int targetId)
                         printf("\n\t\t  STOCK QTY  : %d units", quantity);
                         printf("\n\t\t-------------------------------------\n");
 
-                        // --- ADDED ORDER BUTTON LOGIC ---
                         int orderChoice;
                         printf("\t\t[1] Order Now  [0] Back to List\n");
                         printf("\t\tSelection: ");
@@ -219,18 +220,13 @@ void showBookDetails(int targetId)
 
                         if (orderChoice == 1)
                         {
-                                // Call function from order.c
-                                placeOrder(id, name, price);
+                                // Now passing the username correctly to order.c
+                                placeOrder(username, id, name, price);
                         }
-
                         break;
                 }
         }
-
         if (!found)
-        {
                 printf("\n\t\t[!] Book with ID %d not found.\n", targetId);
-        }
-
         fclose(fp);
 }
