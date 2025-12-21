@@ -18,7 +18,7 @@ int login_user()
 
     // Header Design
     printf("\n\t\t" CYN "================================" RESET);
-    printf("\n\t\t      SECURE USER LOGIN         ");
+    printf("\n\t\t      UNSECURE USER LOGIN         ");
     printf("\n\t\t" CYN "================================" RESET "\n");
 
     printf("\t\t%-12s: ", "Username");
