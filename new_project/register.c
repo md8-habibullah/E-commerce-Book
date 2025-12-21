@@ -27,10 +27,11 @@ int next_id()
 
 // int main () {
 //     register_user();
-   
+
 // }
 
-void register_user(){
+void register_user()
+{
     FILE *fp;
     int id = next_id();
     char username[50], password[50], email[100];
@@ -43,11 +44,9 @@ void register_user(){
 
     printf("Enter password: ");
     scanf("%s", password);
-    
 
     fp = fopen("users_database.txt", "a");
-    fprintf(fp, "%d,%s,%s,%s\n", id, username, password, email);
+    fprintf(fp, "%d,%s,%s,%s\n", id, username, email, password);
     fclose(fp);
     printf("Registration successful! Your user ID is %d \n", id);
 }
-
