@@ -12,7 +12,7 @@
 // 7,zihad,zihad@mail,1234
 // 8,rrr,rrrr,rrr
 
-// they are demo of , so i want if user give user name and email, if both matched with database, then show password
+
 
 void forget_pass()
 {
