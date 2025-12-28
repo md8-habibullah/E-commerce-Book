@@ -1,142 +1,180 @@
 # E-Commerce Book Management System
 
-A robust, terminal-based E-Commerce application for book inventory management and customer ordering. This system has been migrated from flat-file storage to **SQLite3**, ensuring data integrity, security, and high performance.
+A robust, terminal-based E-Commerce application for book inventory management and customer ordering. This system has been migrated from flat-file storage to **SQLite3**, ensuring data integrity, transaction security, and high performance.
+
+**Repository URL:** https://github.com/md8-habibullah/E-commerce-Book.git
+
+---
 
 ## Features
 
 ### User Portal
-
-- **Secure Registration**: Create an account with unique credentials.
-- **Encrypted-style Login**: Secure session access with limited login attempts.
-- **Browse Inventory**: View a real-time list of available books directly from the database.
-- **Order Management**: Place orders for books and view your personalized order history.
-- **Password Recovery**: Simple recovery tool for forgotten passwords.
+* **Secure Authentication:** User registration and login with encrypted-style session handling.
+* **Shopping Cart System:** Users can add multiple items to a cart, view summaries, and checkout in bulk.
+* **Tiered Discount System:** Automatic discounts applied at checkout based on total order value:
+    * 20% Discount for orders above 1999.00 Taka
+    * 10% Discount for orders above 1499.00 Taka
+    * 5% Discount for orders above 999.00 Taka
+* **Comprehensive Order History:** Tracks order status (Pending, Delivered, Cancelled), delivery addresses, and contact numbers.
+* **Account Recovery:** Functionality to retrieve lost passwords using email verification.
 
 ### Admin Panel
-
-- **Inventory Control**: Add new books, edit existing details, or remove stock with immediate database updates.
-- **Stock Tracking**: Real-time monitoring of price and quantity.
-- **Secure Access**: Dedicated admin login portal.
-
----
-
-## Quick Start
-
-### For Linux:
-
-```bash
-gcc *.c -o run -lsqlite3 && ./run
-```
-
-### For Advanced Compilation (explicit file listing):
-
-```bash
-gcc ./admin.c ./admin_login.c ./cart.c ./forget_pass.c ./login.c ./main.c ./order.c ./register.c ./user.c ./book_controler.c ./total.h -o run -lsqlite3 && ./run
-```
+* **Inventory Management:** Add, edit, or delete books from the live database.
+* **Order Fulfillment:** View detailed order lists including delivery addresses and phone numbers.
+* **Status Updates:** Administrators can update order statuses (e.g., from Pending to Delivered).
+* **Secure Access:** Dedicated login portal for administrative tasks.
 
 ---
 
-## System Architecture
+## Installation and Setup
 
-The project follows a modular C architecture, utilizing SQLite3 for relational data management.
+### 1. Windows Environment
 
-| Component          | Responsibility                                     |
-| ------------------ | -------------------------------------------------- |
-| `main.c`           | Entry point and database connection handler.       |
-| `book_controler.c` | Core logic for CRUD operations on book data.       |
-| `order.c`          | Handles transaction records and history retrieval. |
-| `setup.sql`        | Database schema initialization and demo data.      |
-| `total.h`          | Global definitions and shared database pointer.    |
+To run this application on Windows, you must have a C compiler (GCC) and the SQLite3 library installed.
 
----
+#### Prerequisites
+It is recommended to use **MSYS2** or **MinGW** to obtain GCC. You can install SQLite3 via a package manager like Chocolatey or vcpkg.
 
-## Prerequisites
-
-Ensure you have the SQLite development headers installed:
-
-# For Ubuntu/Debian
-
-```bash
-sudo apt install libsqlite3-dev
-```
-
-# For Fedora/RHEL
-
-```bash
-sudo dnf install sqlite-devel
-```
-
-# For Arch Linux
-
-```bash
-sudo pacman -S sqlite
-```
-
-# For Windows (using vcpkg)
-
-```bash
-vcpkg install sqlite3:x64-windows
-```
-
-# For Windows (using Chocolatey)
-
-```bash
+**Using Chocolatey:**
+```powershell
 choco install sqlite
+
 ```
 
-## Installation & Setup
+#### Compilation and Execution
 
-1. **Clone the repository:**
-
-```bash
-git clone <your-repo-link>
+1. **Clone the Repository:**
+```powershell
+git clone https://github.com/md8-habibullah/E-commerce-Book.git
 cd E-commerce-Book
 
 ```
 
-2. **Initialize the Database:**
-   Use the provided SQL script to create the tables and seed demo data:
 
+2. **Initialize the Database:**
+Run the SQL setup script to create the required tables and insert demo data.
+```powershell
+sqlite3 ecommerce.db < setup.sql
+
+```
+
+
+3. **Compile the Application:**
+Ensure you link the SQLite3 library.
+```powershell
+gcc *.c -o run.exe -lsqlite3
+
+```
+
+
+4. **Run:**
+```powershell
+./run.exe
+
+```
+
+
+
+### 2. Linux Environment
+
+You must install the GCC compiler and SQLite development headers. Choose the command corresponding to your distribution.
+
+#### Install Dependencies
+
+**Debian / Ubuntu / Kali / Mint:**
+
+```bash
+sudo apt update
+sudo apt install build-essential libsqlite3-dev
+
+```
+
+**Fedora / RHEL / CentOS / AlmaLinux:**
+
+```bash
+sudo dnf install gcc sqlite-devel
+
+```
+
+**Arch Linux / Manjaro / EndeavourOS:**
+
+```bash
+sudo pacman -S base-devel sqlite
+
+```
+
+#### Compilation and Execution
+
+1. **Clone the Repository:**
+```bash
+git clone https://github.com/md8-habibullah/E-commerce-Book.git
+cd E-commerce-Book
+
+```
+
+
+2. **Initialize the Database:**
 ```bash
 sqlite3 ecommerce.db < setup.sql
 
 ```
 
-3. **Compile the Project:**
-   Link the `sqlite3` library during compilation:
 
+3. **Compile the Application:**
 ```bash
 gcc *.c -o run -lsqlite3
 
 ```
 
-4. **Run the Application:**
 
+4. **Run:**
 ```bash
 ./run
 
 ```
 
+
+
+---
+
+## System Architecture
+
+The project utilizes a modular C architecture backed by a relational SQLite3 database.
+
+| Component | Responsibility |
+| --- | --- |
+| **main.c** | Application entry point and database connection lifecycle. |
+| **cart.c** | Manages shopping cart operations, bill calculation, and discount logic. |
+| **order.c** | Handles order processing, delivery details, and history retrieval. |
+| **book_controler.c** | Performs CRUD operations (Create, Read, Update, Delete) on inventory. |
+| **user.c** | Manages the user dashboard and navigation logic. |
+| **admin.c** | Provides the administrative interface for stock and order management. |
+| **setup.sql** | Database schema definition and initial data seeding. |
+
 ---
 
 ## Database Schema
 
-The system utilizes four main tables:
+The system uses a relational schema with five primary tables:
 
-- **`users`**: Stores customer profiles (ID, Username, Email, Password).
+1. **users**: Stores customer credentials (ID, Username, Email, Password).
+2. **admins**: Stores administrative access credentials.
+3. **books**: Inventory data including Title, Author, Price, and Stock Quantity.
+4. **cart**: Temporary storage for items selected by the user before checkout.
+5. **orders**: Permanent transaction records containing:
+* Product Details
+* Price (post-discount)
+* Delivery Address & Phone Number
+* Order Status (Pending/Delivered/Cancelled)
 
-- **`admins`**: Stores administrative credentials.
 
-- **`books`**: Inventory details including Title, Author, Price, and Quantity.
-
-- **`orders`**: Transaction logs linked to user accounts.
 
 ---
 
-## Security & Optimization
+## Security and Optimization
 
-- **SQL Injection Protection**: Implemented using `sqlite3_prepare_v2` and parameter binding (`?`).
-- **Data Integrity**: Relational constraints and foreign keys ensure consistent order history.
-- **Performance**: Replaced O(N) file-parsing loops with indexed SQL queries for near-instant data retrieval.
+* **SQL Injection Prevention:** All user inputs are sanitized using `sqlite3_prepare_v2` and parameter binding.
+* **Data Integrity:** Foreign key constraints ensure that cart items and orders are strictly linked to valid users.
+* **Performance:** Indexed SQL queries replace file-based parsing, offering immediate data retrieval and updates.
 
 ---
