@@ -38,6 +38,17 @@ CREATE TABLE
         FOREIGN KEY (username) REFERENCES users (username)
     );
 
+-- setup.sql additions
+CREATE TABLE IF NOT EXISTS cart (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    book_id INTEGER NOT NULL,
+    book_name TEXT NOT NULL,
+    price REAL NOT NULL,
+    FOREIGN KEY (username) REFERENCES users(username),
+    FOREIGN KEY (book_id) REFERENCES books(id)
+);
+
 -- Demo Data
 INSERT INTO
     admins (username, password)

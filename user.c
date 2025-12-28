@@ -15,7 +15,8 @@ void userPage(char *loggedInUser)
         printf("\n\t\t           USER CONTROL PANEL           ");
         printf("\n\t\t========================================");
         printf("\n\t\t  [1] Browse Book List");
-        printf("\n\t\t  [2] View My Orders");
+        printf("\n\t\t  [2] View My Cart");
+        printf("\n\t\t  [3] View My Orders");
         printf("\n\t\t  [0] Logout Session");
         printf("\n\t\t----------------------------------------");
         printf("\n\t\tEnter choice: ");
@@ -24,7 +25,7 @@ void userPage(char *loggedInUser)
             printf("\n\t\t[!] Invalid input.");
             while (getchar() != '\n');
             continue;
-        }
+        };
 
         switch (choice) {
             case 1:
@@ -35,7 +36,11 @@ void userPage(char *loggedInUser)
                     showBookDetails(bookId, loggedInUser);
                 }
                 break;
+
             case 2:
+                viewCart(loggedInUser);
+                break;
+            case 3:
                 viewOrderHistory(loggedInUser);
                 break;
             case 0:

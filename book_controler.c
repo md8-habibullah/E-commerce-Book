@@ -120,14 +120,16 @@ void showBookDetails(int targetId, char *username)
                         printf("\n\t\t-------------------------------------\n");
 
                         int orderChoice;
-                        printf("\t\t[1] Order Now  [0] Back to List\n");
+                        // printf("\t\t[1] Order Now  [0] Back to List\n");
+                        printf("\t\t[1] Add to Cart  [0] Back to List\n");
                         printf("\t\tSelection: ");
                         scanf("%d", &orderChoice);
 
                         if (orderChoice == 1)
                         {
                                 // This calls the refactored placeOrder in order.c
-                                placeOrder(username, id, (char *)name, price);
+                                // placeOrder(username, id, (char *)name, price);
+                                addToCart(username, id, (char *)name, price);
                         }
                 }
                 else

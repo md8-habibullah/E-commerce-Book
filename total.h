@@ -19,6 +19,8 @@ int login_admin();
 void placeOrder(char *username, int bookId, char *bookName, float price);
 void forget_pass();
 void viewOrderHistory (char* loggedInUser);
-
+void addToCart(char *username, int bookId, char *bookName, float price);
+void viewCart(char *username);
+void checkout(char *username);
 
 #endif
