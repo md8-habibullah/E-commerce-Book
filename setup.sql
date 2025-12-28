@@ -44,7 +44,7 @@ INSERT INTO
 VALUES
     ('admin', 'password'),
     ('zhd', '123');
-
+ 
 INSERT INTO
     users (username, email, password)
 VALUES
