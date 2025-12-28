@@ -14,7 +14,7 @@ void placeOrder(char *username, int bookId, char *bookName, float price)
     char date[20];
     sprintf(date, "%02d-%02d-%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
 
-    const char *sql = "INSERT INTO orders (username, book_id, book_name, price, date) VALUES (?, ?, ?, ?, ?);";
+    const char *sql = "INSERT INTO orders (username, book_id, book_name, price, order_date) VALUES (?, ?, ?, ?, ?);";
 
     if (sqlite3_prepare_v2(db, sql, -1, &res, 0) == SQLITE_OK) {
         sqlite3_bind_text(res, 1, username, -1, SQLITE_STATIC);
@@ -33,7 +33,7 @@ void placeOrder(char *username, int bookId, char *bookName, float price)
 void viewOrderHistory(char* currentUser) {
     sqlite3_stmt *res;
     // Optimization: The database filters the records for us
-    const char *sql = "SELECT id, book_name, price, date FROM orders WHERE username = ?;";
+    const char *sql = "SELECT id, book_name, price, order_date as date FROM orders WHERE username = ?;";
 
     printf("\n\t\t================ YOUR ORDER HISTORY ================\n");
     printf("\t\t%-8s | %-15s | %-8s | %-10s\n", "ORDER ID", "BOOK NAME", "PRICE", "DATE");
