@@ -1,57 +1,46 @@
 #include <stdio.h>
 #include <string.h>
+#include <sqlite3.h>
 #include "total.h"
+
 int login_admin()
 {
-    FILE *fp;
-    char username[50], password[50], line[256];
+    char username[50], password[50];
+    sqlite3_stmt *res;
     int attempts = 3;
 
     printf("===== ADMIN LOGIN =====\n");
     printf("Enter admin username: ");
     scanf("%s", username);
 
-    fp = fopen("admin_database.txt", "r");
-    if (fp == NULL)
-    {
-        printf("No admins registered yet!\n");
-        return 0;
-    }
     while (attempts > 0)
     {
         printf("Enter admin password: ");
         scanf("%s", password);
 
-        rewind(fp);
+        // SQL query to check admin credentials
+        const char *sql = "SELECT username FROM admins WHERE username = ? AND password = ?;";
 
-        while (fgets(line, sizeof(line), fp))
-        {
-            int id;
-            char u[50], p[100];
-
-            sscanf(line, "%d,%49[^,],%99[^\n]",
-                   &id, u, p);
-
-            if (strcmp(username, u) == 0 &&
-                strcmp(password, p) == 0)
-            {
-                printf("Admin login successful! Welcome %s\n", u);
-                fclose(fp);
-
-                adminPage();
-
-                return 1;
-            }
+        if (sqlite3_prepare_v2(db, sql, -1, &res, 0) != SQLITE_OK) {
+            printf("Database error: %s\n", sqlite3_errmsg(db));
+            return 0;
         }
+
+        sqlite3_bind_text(res, 1, username, -1, SQLITE_STATIC);
+        sqlite3_bind_text(res, 2, password, -1, SQLITE_STATIC);
+
+        if (sqlite3_step(res) == SQLITE_ROW) {
+            printf("Admin login successful! Welcome %s\n", username);
+            sqlite3_finalize(res);
+            adminPage();
+            return 1;
+        }
+
         attempts--;
+        sqlite3_finalize(res);
         printf("Wrong password! Attempts left: %d\n", attempts);
     }
 
-    fclose(fp);
     printf("Invalid admin username or password\n");
     return 0;
 }
-// int main()
-// {
-//     login_admin();
-// }

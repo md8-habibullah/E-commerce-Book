@@ -1,62 +1,33 @@
 #include <stdio.h>
 #include <string.h>
-
-// actually we want add if forgot password , then read "user_database.txt" and read that user based on username 
-// user_database.txt
-// id,username,email,password
-// 1,test,test@email,111
-// 2,aaa,aaa@mail,1234
-// 3,bbb,123,111
-// 4,ttt,ttt@mail,234
-// 6,lolita,lolita@mail,134
-// 7,zihad,zihad@mail,1234
-// 8,rrr,rrrr,rrr
-
-
+#include <sqlite3.h>
+#include "total.h"
 
 void forget_pass()
 {
-    char username[50];
-    char email[50];
-    char file_username[50];
-    char file_email[50];
-    char file_password[50];
-    int found = 0;
+    char username[50], email[50];
+    sqlite3_stmt *res;
 
     printf("Enter your username: ");
     scanf("%s", username);
     printf("Enter your email: ");
     scanf("%s", email);
 
-    FILE *file = fopen("users_database.txt", "r");
-    if (file == NULL)
-    {
-        printf("Could not open user database.\n");
-        return;
-    }
+    const char *sql = "SELECT password FROM users WHERE username = ? AND email = ?;";
 
-    // Skip the header line
-    char header[100];
-    fgets(header, sizeof(header), file);
+    if (sqlite3_prepare_v2(db, sql, -1, &res, 0) == SQLITE_OK) {
+        sqlite3_bind_text(res, 1, username, -1, SQLITE_STATIC);
+        sqlite3_bind_text(res, 2, email, -1, SQLITE_STATIC);
 
-    while (fscanf(file, "%*d,%49[^,],%49[^,],%49s", file_username, file_email, file_password) != EOF)
-    // EOL = End Of Line..
-    // EOF = End Of File
-    {
-        if (strcmp(username, file_username) == 0 && strcmp(email, file_email) == 0)
-        {
-            printf("Your password is: %s\n", file_password);
-            found = 1;
-            break;
+        if (sqlite3_step(res) == SQLITE_ROW) {
+            // Retrieve the password from the first column of the result
+            const unsigned char *password = sqlite3_column_text(res, 0);
+            printf("Your password is: %s\n", password);
+        } else {
+            printf("No matching user found.\n");
         }
+        sqlite3_finalize(res);
+    } else {
+        printf("Database error.\n");
     }
-
-    if (!found)
-    {
-        printf("No matching user found.\n");
-    }
-
-    fclose(file);
 }
-
-

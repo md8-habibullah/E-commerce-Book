@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "total.h"
 #include <string.h>
+#include "total.h"
 
 void userPage(char *loggedInUser)
 {

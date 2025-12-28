@@ -1,77 +1,61 @@
 #include <stdio.h>
 #include <string.h>
-#include <time.h> // For timestamping orders
+#include <time.h>
+#include <sqlite3.h>
 #include "total.h"
 
-int nextOrder_id()
-{
-    FILE *fp = fopen("order_history.txt", "r");
-    if (fp == NULL)
-        return 1;
-    int count = 0;
-    char ch;
-    while ((ch = fgetc(fp)) != EOF)
-    {
-        if (ch == '\n')
-            count++;
-    }
-    fclose(fp);
-    return count + 1;
-}
-// Updated to include the username of the person buying
+// nextOrder_id() is REMOVED. SQLite AUTOINCREMENT handles this.
+
 void placeOrder(char *username, int bookId, char *bookName, float price)
 {
-    FILE *fp = fopen("order_history.txt", "a");
-    if (fp == NULL)
-        return;
-
-    int orderId = nextOrder_id();
+    sqlite3_stmt *res;
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
     char date[20];
     sprintf(date, "%02d-%02d-%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
 
-    // CSV Format: OrderID, Username, BookID, BookName, Price, Date
-    fprintf(fp, "%d,%s,%d,%s,%.2f,%s\n", orderId, username, bookId, bookName, price, date);
-    fclose(fp);
+    const char *sql = "INSERT INTO orders (username, book_id, book_name, price, date) VALUES (?, ?, ?, ?, ?);";
 
-    printf("\n\t\t[SUCCESS] Order #%d placed for %s\n", orderId, username);
+    if (sqlite3_prepare_v2(db, sql, -1, &res, 0) == SQLITE_OK) {
+        sqlite3_bind_text(res, 1, username, -1, SQLITE_STATIC);
+        sqlite3_bind_int(res, 2, bookId);
+        sqlite3_bind_text(res, 3, bookName, -1, SQLITE_STATIC);
+        sqlite3_bind_double(res, 4, price);
+        sqlite3_bind_text(res, 5, date, -1, SQLITE_STATIC);
+
+        if (sqlite3_step(res) == SQLITE_DONE) {
+            printf("\n\t\t[SUCCESS] Order placed for %s\n", username);
+        }
+        sqlite3_finalize(res);
+    }
 }
 
-
-
 void viewOrderHistory(char* currentUser) {
-    FILE *fp = fopen("order_history.txt", "r");
-    if (fp == NULL) {
-        printf("\n\t\t[!] No order history found.\n");
-        return;
-    }
-
-    char line[256];
-    int found = 0;
+    sqlite3_stmt *res;
+    // Optimization: The database filters the records for us
+    const char *sql = "SELECT id, book_name, price, date FROM orders WHERE username = ?;";
 
     printf("\n\t\t================ YOUR ORDER HISTORY ================\n");
     printf("\t\t%-8s | %-15s | %-8s | %-10s\n", "ORDER ID", "BOOK NAME", "PRICE", "DATE");
     printf("\t\t----------------------------------------------------\n");
 
-    while (fgets(line, sizeof(line), fp)) {
-        int ordId, bkId;
-        char user[50], bName[50], date[20];
-        float price;
-
-        // Parsing: OrderID, Username, BookID, BookName, Price, Date
-        sscanf(line, "%d,%49[^,],%d,%49[^,],%f,%19[^\n]", 
-               &ordId, user, &bkId, bName, &price, date);
-
-        if (strcmp(user, currentUser) == 0) {
-            printf("\t\t#%-7d | %-15.15s | $%-7.2f | %-10s\n", ordId, bName, price, date);
+    if (sqlite3_prepare_v2(db, sql, -1, &res, 0) == SQLITE_OK) {
+        sqlite3_bind_text(res, 1, currentUser, -1, SQLITE_STATIC);
+        
+        int found = 0;
+        while (sqlite3_step(res) == SQLITE_ROW) {
             found = 1;
+            printf("\t\t#%-7d | %-15.15s | $%-7.2f | %-10s\n", 
+                   sqlite3_column_int(res, 0),
+                   sqlite3_column_text(res, 1),
+                   sqlite3_column_double(res, 2),
+                   sqlite3_column_text(res, 3));
         }
-    }
 
-    if (!found) {
-        printf("\t\t          No orders found for your account.         \n");
+        if (!found) {
+            printf("\t\t          No orders found for your account.         \n");
+        }
+        sqlite3_finalize(res);
     }
     printf("\t\t----------------------------------------------------\n");
-    fclose(fp);
 }

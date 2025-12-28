@@ -1,5 +1,8 @@
 #ifndef TOTAL_H
 #define TOTAL_H
+#include <sqlite3.h>
+
+extern sqlite3 *db;
 
 void adminPage();
 void userPage(char *loggedInUser); // Updated
@@ -15,5 +18,7 @@ int login_admin();
 // Updated to match order.c definition
 void placeOrder(char *username, int bookId, char *bookName, float price);
 void forget_pass();
+void viewOrderHistory (char* loggedInUser);
+
 
 #endif
