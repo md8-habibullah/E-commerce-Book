@@ -1,4 +1,0 @@
-1,BookA,AuthorA,100.00,5
-2,BookB,AuthorB,200.00,3
-3,BookC,AuthorC,300.00,7
-4,BookD,AuthorD,400.00,9

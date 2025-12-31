@@ -1,0 +1,54 @@
+name: Build and Test
+
+on:
+  push:
+    # Runs on every push to any branch
+  pull_request:
+    # Runs on every pull request targeting any branch
+
+jobs:
+  # 1. Windows Build (Prioritized)
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MSYS2 (GCC & SQLite3)
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          base-devel
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-sqlite3
+
+    - name: Compile Code
+      shell: msys2 {0}
+      run: |
+        gcc *.c -o run.exe -lsqlite3
+
+    - name: Verify Execution
+      shell: msys2 {0}
+      # Pipes "0" into the program to simulate choosing "Exit"
+      run: |
+        echo "0" | ./run.exe
+
+  # 2. Linux Build
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsqlite3-dev
+
+    - name: Compile Code
+      run: |
+        gcc *.c -o run -lsqlite3
+
+    - name: Verify Execution
+      # Pipes "0" into the program to simulate choosing "Exit"
+      run: |
+        echo "0" | ./run

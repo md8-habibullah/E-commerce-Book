@@ -1,210 +1,116 @@
 #include <stdio.h>
 #include <string.h>
+#include <sqlite3.h>
 #include "total.h"
 
-int nextBook_id()
-{
-        FILE *fp = fopen("books.txt", "r");
-        if (fp == NULL)
-                return 1;
-        int count = 0;
-        char ch;
-        while ((ch = fgetc(fp)) != EOF)
-        {
-                if (ch == '\n')
-                        count++;
-        }
-        fclose(fp);
-        return count + 1; // ID starts from 1
-}
+// nextBook_id() is REMOVED. SQLite handles IDs automatically.
 
 void addBook()
 {
-        FILE *fp;
-        int id = nextBook_id();
         char name[50], author[50];
         float price;
         int quantity;
+        sqlite3_stmt *res;
 
-        printf("\n\t\t========================================");
-        printf("\n\t\t           ADD NEW INVENTORY            ");
-        printf("\n\t\t========================================\n");
-
-        printf("\t\t%-15s: ", "Book Title");
+        printf("\n\t\t=========== ADD NEW BOOK ===========");
+        printf("\n\t\tBook Title  : ");
         scanf(" %[^\n]", name);
-        printf("\t\t%-15s: ", "Author Name");
+        printf("\t\tAuthor Name : ");
         scanf(" %[^\n]", author);
-        printf("\t\t%-15s: ", "Unit Price");
+        printf("\t\tUnit Price  : ");
         scanf("%f", &price);
-        printf("\t\t%-15s: ", "Initial Qty");
+        printf("\t\tInitial Qty : ");
         scanf("%d", &quantity);
 
-        fp = fopen("books.txt", "a");
-        fprintf(fp, "%d,%s,%s,%.2f,%d\n", id, name, author, price, quantity);
-        fclose(fp);
+        const char *sql = "INSERT INTO books (title, author, price, quantity) VALUES (?, ?, ?, ?);";
 
-        printf("\t\t----------------------------------------\n");
-        printf("\t\t[SUCCESS] Book ID #%d stored in database.\n", id);
+        if (sqlite3_prepare_v2(db, sql, -1, &res, 0) == SQLITE_OK)
+        {
+                sqlite3_bind_text(res, 1, name, -1, SQLITE_STATIC);
+                sqlite3_bind_text(res, 2, author, -1, SQLITE_STATIC);
+                sqlite3_bind_double(res, 3, price);
+                sqlite3_bind_int(res, 4, quantity);
+
+                if (sqlite3_step(res) == SQLITE_DONE)
+                {
+                        printf("\t\t[SUCCESS] Book added to database.\n");
+                }
+                sqlite3_finalize(res);
+        }
 }
 
 void editBook()
 {
-        FILE *fp = fopen("books.txt", "r");
-        FILE *temp = fopen("temp.txt", "w");
-        if (fp == NULL)
-        {
-                printf("\t\t[!] Error: No database found.\n");
-                return;
-        }
+        int bookId, choice;
+        float newPrice;
+        int newQty;
+        char sql[256];
 
-        int bookId, found = 0;
-        char line[200];
-
-        showBookList();
-        printf("\n\t\tEnter Target Book ID to Edit: ");
+        showBookList(); // Show list so user knows IDs
+        printf("\n\t\tEnter Book ID to Edit: ");
         scanf("%d", &bookId);
 
-        while (fgets(line, sizeof(line), fp))
+        printf("\t\t[1] Update Price  [2] Update Quantity\n\t\tChoice: ");
+        scanf("%d", &choice);
+
+        if (choice == 1)
         {
-                int id, quantity;
-                char name[50], author[50];
-                float price;
-
-                sscanf(line, "%d,%49[^,],%49[^,],%f,%d", &id, name, author, &price, &quantity);
-
-                if (id == bookId)
-                {
-                        found = 1;
-                        int choice;
-                        printf("\n\t\t--- EDITING: %s ---\n", name);
-                        printf("\t\t[1] Name  [2] Author  [3] Price  [4] Quantity\n");
-                        printf("\t\tChange Choice: ");
-                        scanf("%d", &choice);
-
-                        if (choice == 1)
-                        {
-                                printf("\t\tNew Name: ");
-                                scanf(" %[^\n]", name);
-                        }
-                        else if (choice == 2)
-                        {
-                                printf("\t\tNew Author: ");
-                                scanf(" %[^\n]", author);
-                        }
-                        else if (choice == 3)
-                        {
-                                printf("\t\tNew Price: ");
-                                scanf("%f", &price);
-                        }
-                        else if (choice == 4)
-                        {
-                                printf("\t\tNew Qty: ");
-                                scanf("%d", &quantity);
-                        }
-                }
-                fprintf(temp, "%d,%s,%s,%.2f,%d\n", id, name, author, price, quantity);
+                printf("\t\tNew Price: ");
+                scanf("%f", &newPrice);
+                sprintf(sql, "UPDATE books SET price = %.2f WHERE id = %d;", newPrice, bookId);
         }
-        fclose(fp);
-        fclose(temp);
-        remove("books.txt");
-        rename("temp.txt", "books.txt");
-
-        if (found)
-                printf("\t\t[SUCCESS] Database record updated.\n");
         else
-                printf("\t\t[ERROR] ID #%d not found.\n", bookId);
+        {
+                printf("\t\tNew Quantity: ");
+                scanf("%d", &newQty);
+                sprintf(sql, "UPDATE books SET quantity = %d WHERE id = %d;", newQty, bookId);
+        }
+
+        // Optimization: Executing a single line update instead of rewriting the whole file
+        if (sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK)
+        {
+                printf("\t\t[SUCCESS] Book ID #%d updated.\n", bookId);
+        }
+        else
+        {
+                printf("\t\t[ERROR] Update failed.\n");
+        }
 }
 
 void deleteBook()
 {
-        FILE *fp = fopen("books.txt", "r");
-        FILE *temp = fopen("temp.txt", "w");
-        if (fp == NULL)
-        {
-                printf("\t\t[!] Database Empty.\n");
-                return;
-        }
-
-        int bookId, found = 0;
-        char line[200];
+        int bookId;
+        char sql[128];
 
         showBookList();
         printf("\n\t\tEnter Book ID to REMOVE: ");
         scanf("%d", &bookId);
 
-        while (fgets(line, sizeof(line), fp))
+        // No more copying lines to temp.txt and deleting books.txt!
+        sprintf(sql, "DELETE FROM books WHERE id = %d;", bookId);
+
+        if (sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK)
         {
-                int id, quantity;
-                char name[50], author[50];
-                float price;
-                sscanf(line, "%d,%49[^,],%49[^,],%f,%d", &id, name, author, &price, &quantity);
-
-                if (id == bookId)
-                {
-                        found = 1;
-                        continue;
-                }
-                fprintf(temp, "%d,%s,%s,%.2f,%d\n", id, name, author, price, quantity);
-        }
-        fclose(fp);
-        fclose(temp);
-        remove("books.txt");
-        rename("temp.txt", "books.txt");
-
-        if (found)
                 printf("\t\t[SUCCESS] Book removed permanently.\n");
-        else
-                printf("\t\t[ERROR] Record not found.\n");
+        }
 }
-
-void showBookList()
+void showBookDetails(int targetId, char *username)
 {
-        FILE *fp = fopen("books.txt", "r");
-        if (fp == NULL)
+        sqlite3_stmt *res;
+        const char *sql = "SELECT id, title, author, price, quantity FROM books WHERE id = ?;";
+
+        if (sqlite3_prepare_v2(db, sql, -1, &res, 0) == SQLITE_OK)
         {
-                printf("\t\t[!] No books available.\n");
-                return;
-        }
-        char line[200];
+                sqlite3_bind_int(res, 1, targetId);
 
-        printf("\n\t\t%-5s | %-20s | %-15s\n", "ID", "BOOK TITLE", "AUTHOR");
-        printf("\t\t--------------------------------------------------\n");
-        while (fgets(line, sizeof(line), fp))
-        {
-                int id;
-                char name[50], author[50];
-                // Read the first 3 fields from CSV
-                sscanf(line, "%d,%49[^,],%49[^,]", &id, name, author);
-                printf("\t\t%-5d | %-20.20s | %-15.15s\n", id, name, author);
-        }
-        fclose(fp);
-}
-
-// ... other functions ...
-
-void showBookDetails(int targetId, char *username) // Accept username here
-{
-        FILE *fp = fopen("books.txt", "r");
-        if (fp == NULL)
-        {
-                printf("\t\t[!] Error opening database.\n");
-                return;
-        }
-
-        char line[200];
-        int found = 0;
-
-        while (fgets(line, sizeof(line), fp))
-        {
-                int id, quantity;
-                char name[50], author[50];
-                float price;
-
-                sscanf(line, "%d,%49[^,],%49[^,],%f,%d", &id, name, author, &price, &quantity);
-
-                if (id == targetId)
+                if (sqlite3_step(res) == SQLITE_ROW)
                 {
-                        found = 1;
+                        int id = sqlite3_column_int(res, 0);
+                        const char *name = (const char *)sqlite3_column_text(res, 1);
+                        const char *author = (const char *)sqlite3_column_text(res, 2);
+                        float price = (float)sqlite3_column_double(res, 3);
+                        int quantity = sqlite3_column_int(res, 4);
+
                         printf("\n\t\t--------- FULL BOOK DETAILS ---------");
                         printf("\n\t\t  BOOK ID    : %d", id);
                         printf("\n\t\t  TITLE      : %s", name);
@@ -214,19 +120,49 @@ void showBookDetails(int targetId, char *username) // Accept username here
                         printf("\n\t\t-------------------------------------\n");
 
                         int orderChoice;
-                        printf("\t\t[1] Order Now  [0] Back to List\n");
+                        // printf("\t\t[1] Order Now  [0] Back to List\n");
+                        printf("\t\t[1] Add to Cart  [0] Back to List\n");
                         printf("\t\tSelection: ");
                         scanf("%d", &orderChoice);
 
                         if (orderChoice == 1)
                         {
-                                // Now passing the username correctly to order.c
-                                placeOrder(username, id, name, price);
+                                // This calls the refactored placeOrder in order.c
+                                // placeOrder(username, id, (char *)name, price);
+                                addToCart(username, id, (char *)name, price);
                         }
-                        break;
                 }
+                else
+                {
+                        printf("\n\t\t[!] Book with ID %d not found.\n", targetId);
+                }
+                sqlite3_finalize(res);
         }
-        if (!found)
-                printf("\n\t\t[!] Book with ID %d not found.\n", targetId);
-        fclose(fp);
+        else
+        {
+                printf("\t\t[!] Database Error: %s\n", sqlite3_errmsg(db));
+        }
+}
+
+void showBookList()
+{
+        sqlite3_stmt *res;
+        const char *sql = "SELECT id, title, author FROM books;";
+
+        printf("\n\t\t%-5s | %-20s | %-15s\n", "ID", "BOOK TITLE", "AUTHOR");
+        printf("\t\t--------------------------------------------------\n");
+
+        if (sqlite3_prepare_v2(db, sql, -1, &res, 0) == SQLITE_OK)
+        {
+                while (sqlite3_step(res) == SQLITE_ROW)
+                {
+                        // Retrieve data by column index
+                        int id = sqlite3_column_int(res, 0);
+                        const unsigned char *title = sqlite3_column_text(res, 1);
+                        const unsigned char *author = sqlite3_column_text(res, 2);
+
+                        printf("\t\t%-5d | %-20.20s | %-15.15s\n", id, title, author);
+                }
+                sqlite3_finalize(res);
+        }
 }
